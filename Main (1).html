@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Finding Mi - All in One</title>
+  <style>
+    /* --- BASIC RESET / BODY STYLING --- */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: #000; 
+      overflow: hidden;
+    }
+
+    /* --- DESKTOP BACKGROUND --- */
+    #desktop {
+      width: 100vw;
+      height: 100vh;
+      background: url('Background.jpg') no-repeat center center;
+      background-size: cover;
+      position: relative;
+    }
+
+    /* Container for icons pinned to top-right */
+    #icons-container {
+      position: absolute;
+      top: 20px;       
+      right: 20px;     
+      display: flex;
+      flex-direction: column;
+      gap: 10px;       
+    }
+
+    /* Updated styles for the app icons */
+    .app-icon-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Desktop Icons */
+    .app-icon {
+      width: 50px;
+      height: 50px;
+      background-size: cover; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .app-icon span {
+      display: none; /* Hide the span inside the icon */
+    }
+
+    .app-name {
+      margin-top: 5px;
+      text-align: center;
+      font-weight: lighter;
+      color: #fff; 
+      font-family: 'Castella', sans-serif; 
+      font-size: 12px; 
+    }
+
+    /* Specific icon images */
+    .app-icon.diary-icon {
+      background-image: url('diaryUI.jpg');
+    }
+    .app-icon.social-icon {
+      background-image: url('feedUI.jpg');
+    }
+    .app-icon.photo-icon {
+      background-image: url('photoUI.jpg');
+    }
+
+    /* Main "window" styles */
+    .window {
+      width: 50vw;
+      height: 50vh;
+      background: #fff;
+      border: 2px solid #888;
+      position: absolute;
+      display: none; 
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 10; 
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+      resize: both; 
+      min-width: 200px; 
+      min-height: 150px;
+    }
+    .window-header {
+      background: #f0a0c0;
+      color: #fff;
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+    }
+    .window-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background: #fafafa;
+    }
+    .close-btn {
+      background: #e55;
+      border: none;
+      color: #fff;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* Lists in main windows (Diary, Social) */
+    .entry-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .entry-list li {
+      margin-bottom: 10px;
+    }
+
+    /* The smaller windows for actual entry/post content */
+    .entry-window {
+      width: 40vw;
+      height: 40vh;
+      resize: both;
+      min-width: 200px;
+      min-height: 150px;
+    }
+    .entry-content {
+      margin-bottom: 12px;
+      background: #fff;
+      border-radius: 4px;
+      padding: 10px;
+    }
+
+    /* The blank is now gray, underlined dashed, clickable */
+    .blank {
+      border-bottom: 2px gray;
+      color: gray;
+      cursor: pointer;
+      position: relative;
+      display: inline-block; /* so the .choices can position relative to this span */
+    }
+
+    /* The hidden list of choices, positioned under the blank */
+    .choices {
+      position: absolute;
+      left: 0;
+      top: 100%; /* Appear directly under the blank */
+      background: #dd7ac1;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      padding: 5px;
+      display: none;
+      /* wipe-down effect: scaleY from 0 -> 1 */
+      transform-origin: top;
+      transform: scaleY(0);
+      transition: transform 0.6s ease;
+      z-index: 100;
+    }
+
+    /* Show on hover: from scaleY(0) to scaleY(1) => "wipe from top" effect */
+    .blank:hover .choices {
+      display: block;
+      animation: wipeDown 1s ease forwards;
+    }
+
+    @keyframes wipeDown {
+      0% {
+        transform: scaleY(0);
+      }
+      100% {
+        transform: scaleY(1);
+      }
+    }
+
+    .choices button {
+      display: block;
+      width: 100%;
+      padding: 5px;
+      border: none;
+      background: #eee;
+      cursor: pointer;
+      text-align: left;
+    }
+    .choices button:hover {
+      background: #ddd;
+    }
+
+    /* locked style (diary only) */
+    .locked {
+      color: #999;
+      font-style: italic;
+    }
+
+    /* Final Reveal (overlay) for the diary */
+    #finalOverlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw; 
+      height: 100vh;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+    #finalOverlay h1 {
+      font-size: 2em;
+      margin-bottom: 1em;
+    }
+    #finalOverlay button {
+      padding: 10px 20px;
+      background: #f0a0c0;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      color: #fff;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="desktop">
+    <div id="icons-container">
+      <!-- Diary Icon -->
+      <div class="app-icon-container">
+        <div class="app-icon diary-icon" onclick="openWindow('miJ0uryWindow')"></div>
+        <div class="app-name">MiJ0ury</div>
+      </div>
+      <!-- Social Icon -->
+      <div class="app-icon-container">
+        <div class="app-icon social-icon" onclick="openWindow('memoriesWindow')"></div>
+        <div class="app-name">memoriesofmi</div>
+      </div>
+      <!-- Photo Icon -->
+      <div class="app-icon-container">
+        <div class="app-icon photo-icon" onclick="openWindow('photoWindow')"></div>
+        <div class="app-name">Photo Gallery</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The main "Diary" window that shows a list of locked/unlocked diary entries -->
+  <div class="window" id="miJ0uryWindow">
+    <div class="window-header">
+      <span>MiJ0ury - Diary</span>
+      <button class="close-btn" onclick="closeWindow('miJ0uryWindow')">X</button>
+    </div>
+    <div class="window-body">
+      <h3>Diary Entries</h3>
+      <ul class="entry-list" id="entryList">
+        <!-- Filled dynamically -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- The main Social window that shows a list of feed posts -->
+  <div class="window" id="memoriesWindow">
+    <div class="window-header">
+      <span>memoriesofmi - Social Feed</span>
+      <button class="close-btn" onclick="closeWindow('memoriesWindow')">X</button>
+    </div>
+    <div class="window-body">
+      <h3>Feed Posts</h3>
+      <ul class="entry-list" id="socialList">
+        <!-- Filled dynamically -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- The main "Photo" window that shows a list of photos -->
+  <div class="window" id="photoWindow">
+    <div class="window-header">
+      <span>Photo - Gallery</span>
+      <button class="close-btn" onclick="closeWindow('photoWindow')">X</button>
+    </div>
+    <div class="window-body">
+      <h3>Photo Gallery</h3>
+      <ul class="entry-list" id="photoList">
+        <!-- Filled dynamically -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- Final Reveal Overlay (Diary) -->
+  <div id="finalOverlay">
+    <h1 id="revealTitle">I remembered, I'm Mi... and you, who are you?</h1>
+    <p>
+      You realize that you, the player, were Mi all along. Your journey of 
+      self-discovery is complete, but your own reflection is just beginning...
+    </p>
+    <button onclick="closeFinalOverlay()">Close Reflection</button>
+  </div>
+
+  <script>
+    /*******************************************************
+     * 1) Data: Diary (locked) + Social (no lock)
+     *******************************************************/
+     const diaryEntries = [
+      {
+        date: "Entry #1",
+        text: "I woke up in the _____ today. The doctors said I was in a car accident. I can't remember much yet...",
+        blanks: [
+          { placeholder: "_____", choices: ["hospital", "home", "school"], correct: 0 }
+        ]
+      },
+      {
+        date: "Entry #2",
+        text: "They told me my name is Mi, but it doesn't feel like me. I'm trying to recall details about my life. I think I was excited about _____.",
+        blanks: [
+          { placeholder: "_____", choices: ["a summer trip", "going to university", "a new pet"], correct: 1 }
+        ]
+      },
+      {
+        date: "Entry #3",
+        text: "Something about 'memoriesofmi' social media account? The last post was about the day before the accident... Maybe I should _____",
+        blanks: [
+          { placeholder: "_____", choices: ["checking the feed", "ignoring it"], correct: 0 }
+        ]
+      },
+      {
+        date: "Final Entry",
+        text: "I typed a final note before... everything happened. My laptop is full of my thoughts. I think I'm finally remembering who I am. I am ___.",
+        blanks: [
+          { placeholder: "___", choices: ["Mi", "someone else", "still unsure"], correct: 0 }
+        ]
+      }
+    ];
+
+    const socialPosts = [
+      { title: "Post #1", content: "Can't believe I'm going to college soon! #excited #newchapter" },
+      { title: "Post #2", content: "Working on a personal journaling app: MiJ0ury. #devlife" },
+      { title: "Post #3", content: "Just got my driver’s license! Next step: a summer road trip!" }
+    ];
+
+    const photos = [
+      { title: "Photo #1", src: "photo1.jpg" },
+      { title: "Photo #2", src: "photo2.jpg" },
+      { title: "Photo #3", src: "photo3.jpg" }
+    ];
+
+    // Diary locked logic
+    let unlockedIndex = 0; // 0 => only first diary entry is accessible
+
+    /*******************************************************
+     * 2) On Page Load: create mini-windows for diaries
+     *******************************************************/
+    document.addEventListener('DOMContentLoaded', () => {
+      [ 'miJ0uryWindow', 'memoriesWindow', 'photoWindow' ].forEach(id => {
+        makeWindowDraggable(document.getElementById(id));
+      });
+
+      // 1) Create a mini-window for each diary entry
+      diaryEntries.forEach((entry, i) => {
+        createDiaryWindow(entry, i);
+      });
+
+      // 2) Create a mini-window for each social post (no lock)
+      socialPosts.forEach((post, i) => {
+        createSocialWindow(post, i);
+      });
+
+      // 3) Create a mini-window for each photo
+      photos.forEach((photo, i) => {
+        createPhotoWindow(photo, i);
+      });
+    });
+
+    /*******************************************************
+     * 3) Create Mini-Windows: Diary (with fill-in blanks)
+     *******************************************************/
+     function createDiaryWindow(entry, i) {
+      const winDiv = document.createElement('div');
+      winDiv.className = "window entry-window";
+      winDiv.id = `entryWindow${i}`;
+
+      // Header
+      const header = document.createElement('div');
+      header.className = "window-header";
+      header.innerHTML = `
+        <span>${entry.date}</span>
+        <button class="close-btn" onclick="closeWindow('entryWindow${i}')">X</button>
+      `;
+      winDiv.appendChild(header);
+
+      // Body
+      const body = document.createElement('div');
+      body.className = "window-body";
+
+      // Text with blanks
+      const contentDiv = document.createElement('div');
+      contentDiv.className = "entry-content";
+      let textWithBlanks = entry.text;
+
+      // For each blank placeholder, replace with clickable .blank + .choices
+      entry.blanks.forEach((blank, idx) => {
+        const blankHtml = `
+          <span class="blank" data-entry="${i}" data-blank="${idx}">
+            ${blank.placeholder}
+            <div class="choices">
+              ${blank.choices.map((choice, choiceIdx) => `
+                <button onclick="fillBlank(${i}, ${idx}, ${choiceIdx})">${choice}</button>
+              `).join('')}
+            </div>
+          </span>
+        `;
+        textWithBlanks = textWithBlanks.replace(blank.placeholder, blankHtml);
+      });
+
+      contentDiv.innerHTML = textWithBlanks;
+      body.appendChild(contentDiv);
+
+      winDiv.appendChild(body);
+      document.body.appendChild(winDiv);
+      makeWindowDraggable(winDiv);
+    }
+
+    /*******************************************************
+     * 4) Create Mini-Windows: Social (no lock)
+     *******************************************************/
+    function createSocialWindow(post, i) {
+      const winDiv = document.createElement('div');
+      winDiv.className = "window entry-window";
+      winDiv.id = `socialWindow${i}`;
+
+      const header = document.createElement('div');
+      header.className = "window-header";
+      header.innerHTML = `
+        <span>${post.title}</span>
+        <button class="close-btn" onclick="closeWindow('socialWindow${i}')">X</button>
+      `;
+      winDiv.appendChild(header);
+
+      const body = document.createElement('div');
+      body.className = "window-body";
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = "entry-content";
+      contentDiv.textContent = post.content;
+      body.appendChild(contentDiv);
+
+      winDiv.appendChild(body);
+      document.body.appendChild(winDiv);
+      makeWindowDraggable(winDiv);
+    }
+
+    /*******************************************************
+     * 5) Create Mini-Windows: Photo
+     *******************************************************/
+    function createPhotoWindow(photo, i) {
+      const winDiv = document.createElement('div');
+      winDiv.className = "window entry-window";
+      winDiv.id = `photoWindow${i}`;
+
+      const header = document.createElement('div');
+      header.className = "window-header";
+      header.innerHTML = `
+        <span>${photo.title}</span>
+        <button class="close-btn" onclick="closeWindow('photoWindow${i}')">X</button>
+      `;
+      winDiv.appendChild(header);
+
+      const body = document.createElement('div');
+      body.className = "window-body";
+
+      const img = document.createElement('img');
+      img.src = photo.src;
+      img.alt = photo.title;
+      img.style.width = "100%";
+      img.style.height = "auto";
+      body.appendChild(img);
+
+      winDiv.appendChild(body);
+      document.body.appendChild(winDiv);
+      makeWindowDraggable(winDiv);
+    }
+
+    /*******************************************************
+     * 6) openDiaryEntry(i) & openSocialPost(i) & openPhoto(i)
+     *******************************************************/
+    function openDiaryEntry(i) {
+      if (i > unlockedIndex) {
+        alert("This entry is locked. Complete previous ones first!");
+        return;
+      }
+      openWindow(`entryWindow${i}`);
+    }
+
+    function openSocialPost(i) {
+      openWindow(`socialWindow${i}`);
+    }
+
+    function openPhoto(i) {
+      openWindow(`photoWindow${i}`);
+    }
+
+    /*******************************************************
+     * 7) Render the Lists in the Main Windows
+     *******************************************************/
+    function renderDiaryList() {
+      const listEl = document.getElementById('entryList');
+      listEl.innerHTML = "";
+      diaryEntries.forEach((entry, i) => {
+        const li = document.createElement('li');
+        if (i <= unlockedIndex) {
+          const btn = document.createElement('button');
+          btn.textContent = entry.date;
+          btn.onclick = () => openDiaryEntry(i);
+          li.appendChild(btn);
+        } else {
+          li.className = "locked";
+          li.textContent = entry.date + " (Locked)";
+        }
+        listEl.appendChild(li);
+      });
+    }
+
+    function renderSocialList() {
+      const listEl = document.getElementById('socialList');
+      listEl.innerHTML = "";
+      socialPosts.forEach((post, i) => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.textContent = post.title;
+        btn.onclick = () => openSocialPost(i);
+        li.appendChild(btn);
+        listEl.appendChild(li);
+      });
+    }
+
+    function renderPhotoList() {
+      const listEl = document.getElementById('photoList');
+      listEl.innerHTML = "";
+      photos.forEach((photo, i) => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.textContent = photo.title;
+        btn.onclick = () => openPhoto(i);
+        li.appendChild(btn);
+        listEl.appendChild(li);
+      });
+    }
+
+    /*******************************************************
+     * 8) Window Show/Hide + Draggable
+     *******************************************************/
+    function openWindow(id) {
+      const win = document.getElementById(id);
+      if (!win) return;
+      win.style.display = "flex";
+      bringToFront(win);
+
+      if (!win.dataset.positioned) {
+        win.style.top = (Math.random() * 10 + 10) + "vh";
+        win.style.left = (Math.random() * 10 + 10) + "vw";
+        win.dataset.positioned = "true";
+      }
+
+      if (id === "miJ0uryWindow") {
+        renderDiaryList();
+      }
+      if (id === "memoriesWindow") {
+        renderSocialList();
+      }
+      if (id === "photoWindow") {
+        renderPhotoList();
+      }
+    }
+
+    function closeWindow(id) {
+      const win = document.getElementById(id);
+      if (win) {
+        win.style.display = "none";
+      }
+    }
+
+    let topZIndex = 10;
+    function bringToFront(win) {
+      topZIndex++;
+      win.style.zIndex = topZIndex;
+    }
+
+    function makeWindowDraggable(win) {
+      const header = win.querySelector('.window-header');
+      if (!header) return;
+      header.onmousedown = (e) => {
+        e.preventDefault();
+        bringToFront(win);
+        let startX = e.clientX;
+        let startY = e.clientY;
+        let initTop = parseInt(win.style.top) || 0;
+        let initLeft = parseInt(win.style.left) || 0;
+
+        document.onmousemove = (moveE) => {
+          moveE.preventDefault();
+          let dx = moveE.clientX - startX;
+          let dy = moveE.clientY - startY;
+          win.style.top = (initTop + dy) + "px";
+          win.style.left = (initLeft + dx) + "px";
+        };
+        document.onmouseup = () => {
+          document.onmousemove = null;
+          document.onmouseup = null;
+        };
+      };
+    }
+
+    /*******************************************************
+     * 9) Fill in the blank function
+     *******************************************************/
+    function fillBlank(entryIdx, blankIdx, choiceIdx) {
+      const entry = diaryEntries[entryIdx];
+      const blank = entry.blanks[blankIdx];
+      const choice = blank.choices[choiceIdx];
+
+      const blankElement = document.querySelector(`.blank[data-entry="${entryIdx}"][data-blank="${blankIdx}"]`);
+      if (!blankElement) return; 
+
+      // If correct
+      if (choiceIdx === blank.correct) {
+        // Replace the blank text with the chosen word
+        blankElement.textContent = choice;
+        blankElement.classList.remove('blank');
+        blankElement.removeAttribute('data-entry');
+        blankElement.removeAttribute('data-blank');
+        const choicesDiv = blankElement.querySelector('.choices');
+        if (choicesDiv) choicesDiv.remove();
+
+        // Check if all blanks are filled
+        const allBlanksFilled = entry.blanks.every((b, idx) => {
+          return document.querySelector(`.blank[data-entry="${entryIdx}"][data-blank="${idx}"]`) === null;
+        });
+
+        if (allBlanksFilled) {
+          alert("Entry completed!");
+          // Unlock next if not last
+          if (entryIdx === diaryEntries.length - 1) {
+            showFinalOverlay();
+          } else if (unlockedIndex === entryIdx) {
+            unlockedIndex++;
+            renderDiaryList();
+          }
+        }
+      } else {
+        // Wrong answer
+        alert("That doesn't feel right...");
+      }
+    }
+
+    /*******************************************************
+     * 10) Final Overlay (Diary)
+     *******************************************************/
+    function showFinalOverlay() {
+      document.getElementById('finalOverlay').style.display = "flex";
+    }
+
+    function closeFinalOverlay() {
+      document.getElementById('finalOverlay').style.display = "none";
+    }
+  </script>
+</body>
+</html>
