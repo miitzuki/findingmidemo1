@@ -137,15 +137,18 @@
       background: #fff;
       border-radius: 4px;
       padding: 10px;
+      white-space: normal; /* Ensures spaces and newlines are respected */
     }
 
     /* The blank is now gray, underlined dashed, clickable */
     .blank {
+      display: inline-block; /* so the .choices can position relative to this span */
+      width: 4em; /* Adjust the width to match the space you want for the blank */
       border-bottom: 2px gray;
       color: gray;
       cursor: pointer;
       position: relative;
-      display: inline-block; /* so the .choices can position relative to this span */
+      
     }
 
     /* The hidden list of choices, positioned under the blank */
@@ -228,11 +231,65 @@
       color: #fff;
       border-radius: 5px;
     }
+
+    /* Opening Screen Styles */
+    #openingScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #2c3e50, #34495e);
+      color: #ecf0f1;
+      font-family: 'Courier Prime', monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    #openingScreen .monologue {
+      text-align: center;
+      font-size: 1.5rem;
+      line-height: 2rem;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    #openingScreen .start-button {
+      margin-top: 2rem;
+      padding: 0.8rem 2rem;
+      font-size: 1.2rem;
+      color: #ecf0f1;
+      background: #34495e;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(236, 240, 241, 0.5);
+      transition: box-shadow 0.3s ease-in-out;
+    }
+
+    #openingScreen .start-button:hover {
+      box-shadow: 0 0 20px rgba(236, 240, 241, 0.8);
+    }
+
+    #openingScreen.hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
+  <!-- Opening Screen -->
+  <div id="openingScreen">
+    <div class="monologue" id="line1">"They said I lost my memory after the accident. That I should try to remember."</div>
+    <div class="monologue" id="line2">"They gave me this laptop. It feels strange and familiar at the same time."</div>
+    <div class="monologue" id="line3">"Maybe if I look closely... I can find something..."</div>
+    <button class="start-button" onclick="startGame()">Start</button>
+  </div>
 
-  <div id="desktop">
+  <!-- Game Content -->
+  <div id="desktop" style="display: none;">
     <div id="icons-container">
       <!-- Diary Icon -->
       <div class="app-icon-container">
@@ -311,38 +368,364 @@
      const diaryEntries = [
       {
         date: "Entry #1",
-        text: "I woke up in the _____ today. The doctors said I was in a car accident. I can't remember much yet...",
+        text: 
+`Reading had been my hobby since (1)_____. It started with bedtime stories, then fairy tales, then anything I could get my hands on. But novels... novels were something else. They weren’t just stories; they were whole worlds waiting to be stepped into.
+
+My first favorite book was Anne of Green Gables. I don’t remember exactly how old I was when I read it, but I do remember how it made me feel—like I had found a friend in Anne, someone who lived too much inside her head, just like me. I think that was the first time I realized that books weren’t just things you read; they were places you belonged to.
+
+By the time I reached (2)_____ school, reading had become something I couldn’t live without. I would bring a book with me everywhere—stuffed into my schoolbag, hidden between textbooks, sometimes even smuggled into exam rooms. (I once finished a test early just to sneak a few pages in. The teacher definitely saw me, but they didn’t say anything. Maybe they understood.)
+
+Then came (3)_____. The kind that keep you awake at night, flipping pages like your life depends on it. The first book I ever bought for myself was* *I’m Traveling Alone*. I don’t even remember why I picked it—maybe I liked the title, maybe it was fate—but after that, I was hooked. The twists, the tension, the feeling of not knowing what was coming next... it was exhilarating. That was when I fell down the rabbit hole of mystery novels.
+
+And then there was White Night. That book was different. It wasn’t just a story—it was heavy, haunting, like a ghost that lingers in your thoughts even after you close the last page. I read it obsessively, too fast for my own good, and then, stupidly, I went online to read more about it... and got spoiled for the biggest twist.
+
+(That was the first time I truly understood what it meant to feel betrayed by the internet.)
+
+My reading habits changed over time. From mystery to horror, from paperback to e-books, from devouring books daily to... barely reading at all. Life got busy. Or maybe I just lost something along the way. But looking at my bookshelf now, covered in a thin layer of dust, I think—maybe it’s time to start again. There’s a copy of The Miracles of the Namiya General Store sitting there, waiting. Maybe tonight... I’ll open it.`,
         blanks: [
-          { placeholder: "_____", choices: ["hospital", "home", "school"], correct: 0 }
+          { placeholder: "(1)_____", choices: ["I was a kid", "2 years ago", "I got into high school"], correct: 0 },
+          { placeholder: "(2)_____", choices: ["Primary school", "Middle school", "High school"], correct: 1 },
+          { placeholder: "(3)_____", choices: ["Thrillers", "Fictions", "Romance"], correct: 0 }
         ]
+
       },
       {
         date: "Entry #2",
-        text: "They told me my name is Mi, but it doesn't feel like me. I'm trying to recall details about my life. I think I was excited about _____.",
+        text: 
+`My daydreams have been getting in the way of me getting things done recently. I mean, I’ve always been daydreaming—zoning out in class when the (1)______ lesson became too much for me to comprehend—but now, it’s happening more often. It’s no longer just about escaping reality in moments of boredom; it feels like I’m slipping away even when I don’t mean to.
+
+Maybe it’s because my desire to escape reality has grown stronger?
+
+Heh. Maybe not.
+
+Before, my daydreams were always about “me in another universe.” In one world, I’m not a student struggling with Maths homework but a (2)______ lounging in her vast bedroom, or a knight sharpening his sword before battle. I’d get lost in these imaginary lives, creating stories, making up friends who didn’t exist. And it was fun—like watching someone else’s life unfold, except it was mine because I could feel every emotion as if it were real.
+
+It’s complicated to put what I’ve been thinking into words. I even once thought about turning my daydreams into a short film—but if I can’t even find the right words, filming wouldn’t be any easier, heh…
+
+Now, I find myself daydreaming about the future instead. I finally realize how (3)______ it can be. When I was younger, I used to ask myself, “What will it be like when I grow up?” But now, it’s different. It’s not just excitement—it’s confusion, nervousness, maybe even fear. And yet, I know it’ll be full of surprises too.
+
+Sometimes, I wonder if I’m really ready to grow up—to be an adult, just like little-me always dreamed of. And then I hesitate, unable to find the answer.
+
+But maybe that’s okay. Maybe I can just keep daydreaming—about being a kid napping all day, or a student struggling with Maths homework—just like I always have.
+
+After all, it’s just a moment of escaping reality.
+`,
         blanks: [
-          { placeholder: "_____", choices: ["a summer trip", "going to university", "a new pet"], correct: 1 }
+          { "placeholder": "(1)______", "choices": ["Science", "Math", "History"], "correct": 1 },
+          { "placeholder": "(2)______", "choices": ["princess", "scientist", "detective"], "correct": 0 },
+          { "placeholder": "(3)______", "choices": ["overwhelming", "exciting", "dull"], "correct": 0 }
         ]
       },
       {
         date: "Entry #3",
-        text: "Something about 'memoriesofmi' social media account? The last post was about the day before the accident... Maybe I should _____",
+        text: 
+`I wasn’t a cold or distant child when I hit puberty.
+
+Sure, there was some (1)______, but I kept a good relationship with my family.
+
+I told my mom (mostly) everything—what happened at school, my friends’ drama, even the smallest, most random thoughts. I joked around with my dad, listened when he vented about work (usually with Mom), and asked him for snack money when cravings hit. I played video games with my younger brother, watched tons of movies together, even shared my music playlists with him. (His music taste is so good now—mostly because of me.)
+
+I’m not (2)______ affectionate, but I’ve always believed my actions speak for themselves.
+
+My friends say they feel good hanging out with me. (Not gonna lie, I feel so cool every time I hear that.) They come to me for advice, or just when they need someone who listens. I like being that person for them. I love being there for my friends.
+
+My relationships with my family and friends are great… right?
+
+So why is it that I can’t seem to have a good romantic relationship?
+
+Actually… I haven’t had a romantic relationship at all.
+
+The people I have a crush on? (3)______. Is that a curse? Or some weird magic power? Some of them weren’t even interested in my orientation to begin with. I have mixed feelings about that, haha…
+
+I think I make people around me feel happy and safe. I am happy—spending time with my family, my friends, making memories with them.
+
+But sometimes—only sometimes—I wish I had someone.
+
+...Maybe that day will come soon. I've been thinking about it a little too much lately.
+`,
         blanks: [
-          { placeholder: "_____", choices: ["checking the feed", "ignoring it"], correct: 0 }
+          { "placeholder": "(1)______", "choices": ["Stubbornness", "Awkwardness", "Indifference"], "correct": 0 },
+          { "placeholder": "(2)______", "choices": ["Physically", "Verbally", "Openly"], "correct": 1 },
+          { "placeholder": "(3)______", "choices": [
+              "They always start dating someone else, usually within a week of me realizing I like them",
+              "They act super nice to me but never actually like me back",
+              "They somehow lose interest in romance altogether"
+          ], "correct": 0 }
         ]
       },
       {
-        date: "Final Entry",
-        text: "I typed a final note before... everything happened. My laptop is full of my thoughts. I think I'm finally remembering who I am. I am ___.",
+        date: "Entry #4",
+        text: 
+`One day, I’ll finally learn how to (1)______.
+
+… Actually, I know how to ride a bike already.
+
+One day, I’ll finally learn how to ride a bike in public.
+
+I can ride a bike. I can control it. But only in the residential area near my home. I still cannot ride a bike to participate in public transport.
+
+Well, I know I can walk or take a bus if I want to go. But the urge to ride a bike is still there, and I know I have to do it. As if doing it will mark a huge success in my life—I’m not really sure though.
+
+I have many goals like this one. Goals that I’ve been striving for but sometimes feel unsure about.
+
+However, I think I’ll be fine. Because after all, (2)______.
+`,
         blanks: [
-          { placeholder: "___", choices: ["Mi", "someone else", "still unsure"], correct: 0 }
+          { "placeholder": "(1)______", "choices": ["Drive a car", "Ride a bike in public", "Swim without holding onto anything"], "correct": 1 },
+          { "placeholder": "(2)______", "choices": [
+              "I can take things one step at a time",
+              "I can simply walk or take a bus if I want to go somewhere",
+              "There’s always another way to get where I need to be"
+          ], "correct": 1 }
+
         ]
-      }
+      },
+      {
+        date: "Entry #5",
+        text: 
+`I don’t really have many favorite places besides my bedroom, but recently, I’ve discovered a very (1)______ café—one that will definitely soon become my new go-to spot!
+
+The café isn’t small, but it gives off a cozy vibe, as if it’s straight out of a Ghibli movie scene. They even play (2)______ there, which just adds to the atmosphere.
+
+Not to mention, the drinks are really good. Actually good. So it’s not just a café for taking pictures or enjoying the vibe—it’s a real café. I’ve already tried the (3)______ and boba tea (yes, they were so good that I ordered twice in one sitting). I think I’ll slowly make my way through the entire menu to find my true favorite drink, hehe.
+
+I’m craving the strawberry latte while writing this… I think I’ll check if they have delivery.
+
+It’s exciting to think about how big the world is, how many places I’ve yet to discover. I wonder what my next favorite place will be.
+
+I hope I find a bakery with fresh-baked cookies, sweet panna cotta, and the softest chiffon cakes next time. Ah… Now I’m craving cakes... 🍰
+`,
+        blanks: [
+          { "placeholder": "(1)______", "choices": ["minimalist", "cozy", "trendy"], "correct": 1 },
+          { "placeholder": "(2)______", "choices": ["indie folk music", "Ghibli music", "soft jazz"], "correct": 1 },
+          { "placeholder": "(3)______", "choices": ["matcha latte", "iced Americano", "strawberry latte"], "correct": 2 }
+
+        ]
+      },
+      {
+        date: "Entry #6",
+        text: 
+`I don’t know if it’s weird to say this, but… the internet is my safe place.
+
+I’ve known the internet since I was a kid. It’s always been there. I’ve seen so many different things—some fascinating, some confusing, some… maybe (1)______. But somehow, I always found my peace here. In an online game lobby. In a stranger’s blog post. In a journal entry written by someone I’ll never meet.
+
+I think the fact that we can know so much yet nothing at the same time intrigues me.
+
+I can write journals online, post about my daily life, share random thoughts that maybe no one cares about—and yet, no one really knows me. They only see the fragments I choose to show. And for some reason, I love that feeling.
+
+The internet, like people say, isn’t completely good—or bad. It depends on (2)______.
+
+And luckily for me, I’ve found more happiness than anything else. My laptop has given me so much joy, more than any negative feelings. I’m grateful for that.
+
+But sometimes, I wonder.
+
+The internet is endless. There’s always more to see, more to learn, more to create. I could stay here forever. And yet… would anyone really notice if (3)______?
+
+I want to share my journey with someone. But sometimes, I ask myself—am I oversharing? Is it too much? Am I saying things I’ll regret later?
+
+…Then again, if I share it online, they don’t really know who I am anyway.
+`,
+        blanks: [
+          { "placeholder": "(1)______", "choices": ["overwhelming", "eye-opening", "unreal"], "correct": 0 },
+          { "placeholder": "(2)______", "choices": ["who you follow", "how you use it", "what you choose to believe"], "correct": 1 },
+          { "placeholder": "(3)______", "choices": ["I deleted everything I ever posted", "I stopped talking to people online", "I disappeared from the internet"], "correct": 2 }
+
+        ]
+      },
+      {
+        date: "Entry #7",
+        text: 
+
+`It’s been a week since I started writing in this journal. At first, I thought I’d only use it to jot down random thoughts—things that crossed my mind, little details I didn’t want to forget. But now, looking back at my entries, I realize how much I’ve needed this.
+
+Lately, I’ve been so busy that I barely have time to process my own thoughts. There are days when everything moves so fast that if I don’t write things down, I might forget them completely. It’s strange, isn’t it? How memories that once felt so vivid can fade into nothing if you don’t hold onto them.
+
+That’s why I’m glad I have this journal. And my social media posts, too. They help me remember. They remind me of who I am.
+
+Because soon, everything is going to change.
+
+In just a few days, I’ll be moving to a new city—for university. It’s such a huge step, but I don’t think it’s fully hit me yet. Right now, I’m still here, in my room, in the home I’ve known my whole life. But soon, I’ll wake up in a different place, surrounded by different people, living a completely different routine.
+
+I wonder if my future self will remember what it felt like to be this version of me. The one who still sits at her childhood desk, still walks the same familiar streets, still orders the same strawberry latte at her favorite café.
+
+I don’t want to forget.
+
+So I’ll write everything down. I’ll reread my old diaries, document every detail, so that my future self can always find her way back to me.
+
+I’ve also been thinking about this laptop. Should I keep it? Bring it with me as a little piece of home? Or maybe I should donate it—let someone else create their own memories with it, the way I did.
+
+Either way, I hope it finds a purpose. I hope that if someone else ever opens this laptop, they find something meaningful in it.
+
+Yes, I’m nervous. Yes, I don’t know what’s coming. But I also know that this is just the beginning. And even with all the uncertainty, I want to be excited. I want to look forward to whatever my future holds.
+
+I can already imagine my university life—late-night study sessions, wandering through a new city, finding new favorite spots, meeting people who will become part of my story.
+
+And no matter how busy I get, I will keep writing. I will keep posting.
+
+Because no matter where I go, I never want to lose myself.
+
+Or forget who I used to be.
+
+I’m (1)______.
+`,
+        blanks: [
+          { "placeholder": "(1)______", "choices": ["Mi"], "correct": 0 }
+        ]
+      },
     ];
 
     const socialPosts = [
-      { title: "Post #1", content: "Can't believe I'm going to college soon! #excited #newchapter" },
-      { title: "Post #2", content: "Working on a personal journaling app: MiJ0ury. #devlife" },
-      { title: "Post #3", content: "Just got my driver’s license! Next step: a summer road trip!" }
+      { title: "Post #1", content: 
+`I reorganized my bookshelf today!
+
+I always knew I had a lot of books, but I never realized just how many. Lowkey feeling proud of myself for sticking with reading as a hobby since I was a kid. Looking at my shelf now, I’m kind of amazed—so many stories I was once obsessed with, and yet, I barely remember them.
+
+But that’s okay. I’ll just pick one and start again.
+
+The Miracles of the Namiya General Store seems like a good place to begin.
+` },
+      { title: "Post #2", content: 
+`Reading brings me so much peace.
+
+Lately, I’ve had a hard time focusing—on studying, on organizing my space, even on simple tasks. I always start something, then somehow, I end up doing something else before finishing it.
+
+But when I read, everything else fades away. Especially when it’s a thriller. I can lose myself in a book for hours, barely noticing time passing. Sometimes, it feels like I could finish a whole novel in one sitting.
+
+I’m glad I finally found the urge to read again. It feels like stepping back into a forgotten piece of my childhood.
+`
+      },
+      { title: "Post #3", content:
+`I brought my book with me today. Took myself on a little self-date—ramen at my favorite restaurant, a slow stroll as the sun set, then wandering into a cute café on the corner. I ordered a strawberry latte, settled into a cozy seat, and got lost in my book.
+
+It was nice. Really nice.
+
+I think little-me would admire me for this. For growing up into someone who takes herself out on quiet days like this, who sips strawberry lattes in cafés and reads books for no other reason than because she loves them.
+
+Back in middle school, I carried a book with me everywhere. Even on exam days, I’d sneak in reading time the moment I finished my papers.
+
+There are no more exams now. But there are still so many books waiting for me. I wonder where I’ll find myself reading next.
+`
+      },
+      { title: "Post #4", content:
+`I found an old notebook today—filled with stories about the universes I created in my head. In one, I was a princess. In another, a knight. An actress. A detective. A traveler. A hero.
+
+I didn’t realize I had that many dream lives.
+`
+      },
+      { title: "Post #5", content:
+`Life is full of surprises. Some days bring good news, some bring bad, and some… bring nothing at all (hehe).
+
+I don’t know why I used to think my life was bland. Looking at it now, I’d say my future is anything but predictable.
+
+This is just the beginning. The real chapter—the important one—is about to start. Finally.
+`
+      },
+      { title: "Post #6", content:
+`I read through my old diary from when I hit puberty.
+
+80% of it was me rambling about the stories I never actually wrote. The other 20%? Me complaining about my parents calling me stubborn just because I ate more snacks than usual. 😭
+
+Like… I’d always eaten snacks at random times! Why was it suddenly a problem?!
+
+I was so dramatic back then. But maybe early-teen me is still in here somewhere.
+`
+      },
+      { title: "Post #7", content:
+`I don’t say “I love you” out loud.
+
+But I do send my friends random memes at 2 AM, make sure my brother doesn’t forget his headphones before school, and text my mom when it’s about to rain so she brings an umbrella.
+
+That counts, right?
+`
+      },
+      { title: "Post #8", content:
+`If I like someone, they’ll be in a relationship within a week.
+
+Not with me, of course. 😃👍
+`
+      },
+      { title: "Post #9", content:
+`I feel like everyone has that one goal. The one they keep saying “One day, I’ll do it,” but then never actually do it.
+
+Mine is to learn how to ride a bike (and participate in public transport).
+
+I will do it. Just… not today.
+`
+      },
+      { title: "Post #10", content:
+`Maybe I don’t have to rush things. Maybe I don’t have to push myself so hard.
+
+Just maybe.
+`
+      },
+      { title: "Post #11", content:
+`You ever step into a place and immediately feel like you belong there?
+
+That’s how I felt when I walked into that one café I just discovered today. It’s super cozy, I want my future home to have such vibe TvT
+`
+      },
+      { title: "Post #12", content:
+`The café I found today feels like it came straight out of a movie.
+
+They were playing Ghibli music while I was sipping my drink, and for a second, I forgot I was in real life.
+
+I love how Ghibli music makes me forget where I am, what I’m feeling the moment I hear those notes. It just… hits different.
+`
+      },
+      { title: "Post #13", content:
+`Me: I’ll just get one drink.
+
+Also me: Orders two because the first one was too good.
+
+Today’s winners: Strawberry latte & boba tea (I’m so indecisive to decide which one is better). 10/10, no regrets.
+`
+      },
+      { title: "Post #14", content:
+`I went through my old browsing history today.
+
+Turns out, years ago, I had a phase. A deep-dive into astrology, Greek mythology, and all that good stuff. It probably started with a Wikipedia page on the 12 zodiac signs or an Apollo myth, and then—rabbit hole.
+
+I bet little-me didn’t even understand half of what I was reading. Some of it was probably way too complex.
+
+But one thing I did understand? The feeling of stumbling across a stranger’s online journal and realizing—hey, maybe I want to write, too. Maybe I want to share my own thoughts, just like they did.
+
+And that’s why I’m here now. Yay.
+`
+      },
+      { title: "Post #15", content:
+`I’ve been posting a lot lately. Have you noticed that?
+
+I’ve been posting daily. Sometimes even hourly.
+
+I wonder if anyone’s noticed how active I’ve been. And if they have… would they notice if I just stopped?
+
+If one day, I disappeared from the internet… would you remember I was ever here?
+`
+      },
+      { title: "Post #16", content:
+`I saw people debated whether teenagers should be online. They say it’s dangerous. They say it messes with your mind.
+
+But personally, I think it’s about how you use it. The internet is massive—you have to navigate it yourself, make sure you don’t get lost or end up in the wrong place.
+
+And I think I’ve been on the right path. My journey here has been so good for self-expression.
+
+If you ask me why I share my thoughts online instead of keeping them in a private journal—I do have a journal. But I also want to inspire people to write, to express themselves in some way. Just like how I was inspired, years ago.
+`
+      },
+      { title: "Post #17", content:
+`Packing feels strange. Everything that’s always been here is about to be somewhere else. My books, my clothes, my laptop… I didn’t think I had this much stuff until I started boxing it up. Maybe that’s why moving feels so unreal. It’s like I’m taking my entire life and shoving it into a suitcase. But at the same time, I feel like I’m leaving something behind. Does that make sense?
+
+Anyway, this is gonna be a long night!!! Hopefully, future-me appreciates all the effort present-me (and little-me) is putting in.
+`
+      },
+      { title: "Post #18", content:
+`Hahhh.This is my last night here TvT Tomorrow, I wake up in a new city, in a new place, starting a new life. I should be sleeping, but my mind won’t stop running. I keep thinking—what if I forget things? What if, years from now, I don’t remember what it felt like to sit here in this room, drinking my usual strawberry latte, writing these posts?
+
+So I guess this is my way of remembering. A message from little*-me* to future-me.
+
+Future-me, if you’re reading this: I hope you’re doing okay. I hope you’re happy. And most of all, I hope you haven’t lost yourself.
+`
+      },
     ];
 
     const photos = [
@@ -402,7 +785,8 @@
       // Text with blanks
       const contentDiv = document.createElement('div');
       contentDiv.className = "entry-content";
-      let textWithBlanks = entry.text;
+      // let textWithBlanks = entry.text;
+      let textWithBlanks = entry.text.replace(/\n/g, "<br/>");
 
       // For each blank placeholder, replace with clickable .blank + .choices
       entry.blanks.forEach((blank, idx) => {
@@ -426,6 +810,8 @@
       document.body.appendChild(winDiv);
       makeWindowDraggable(winDiv);
     }
+    
+    
 
     /*******************************************************
      * 4) Create Mini-Windows: Social (no lock)
@@ -448,7 +834,7 @@
 
       const contentDiv = document.createElement('div');
       contentDiv.className = "entry-content";
-      contentDiv.textContent = post.content;
+      contentDiv.innerHTML = post.content.replace(/\n/g, "<br/>");
       body.appendChild(contentDiv);
 
       winDiv.appendChild(body);
@@ -668,6 +1054,24 @@
 
     function closeFinalOverlay() {
       document.getElementById('finalOverlay').style.display = "none";
+    }
+
+    // JavaScript for Opening Screen
+    document.addEventListener('DOMContentLoaded', () => {
+      const lines = document.querySelectorAll('#openingScreen .monologue');
+      let delay = 0;
+
+      lines.forEach((line, index) => {
+        setTimeout(() => {
+          line.style.opacity = 1;
+        }, delay);
+        delay += 2000; // 2 seconds delay between each line
+      });
+    });
+
+    function startGame() {
+      document.getElementById('openingScreen').classList.add('hidden');
+      document.getElementById('desktop').style.display = 'block';
     }
   </script>
 </body>
